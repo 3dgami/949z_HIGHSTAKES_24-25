@@ -7,6 +7,8 @@
 #include "pros/rtos.hpp"
 //#include <cstddef>
 
+
+
 //update all motor ports if needed
 pros::Controller master{CONTROLLER_MASTER};	
 pros::Motor right_front(10);
@@ -627,8 +629,10 @@ void competition_initialize()
 
  // path file name is "example.txt".
 // "." is replaced with "_" to overcome c++ limitations
-//ASSET(example_txt);
-//ASSET(example2_txt)
+ASSET(Path_01_txt);
+ASSET(Path_02_txt);
+ASSET(Path_03_txt);
+ASSET(example_txt);
 
 void autonomous() 
 {
@@ -636,9 +640,9 @@ void autonomous()
     //chassis.setPose(0, 0, 0);
     // lookahead distance: 15 inches
     // timeout: 2000 ms
-    //chassis.follow(example_txt, 15, 2000);
+    //chassis.follow(Path_01_txt, 15, 2000);
     // follow the next path, but with the robot going backwards
-    //chassis.follow(example2_txt, 15, 2000, false);
+    //chassis.follow(Path_01_txt, 15, 2000, false);
 
 
 	/*if(selector::auton == 1)
@@ -687,7 +691,12 @@ void opcontrol()
 	int right;
 	bool IntakeState;
 	bool ExpansionState;
+	bool ExpansionState2;
 	auto ExpansionHook = 'A';
+	auto ExpansionIntake ='B';
+
+	pros::c::adi_pin_mode(ExpansionIntake, OUTPUT);
+	pros::c::adi_digital_write(ExpansionIntake, LOW);
 
 	pros::c::adi_pin_mode(ExpansionHook, OUTPUT);
 	pros::c::adi_digital_write(ExpansionHook, LOW);
@@ -735,7 +744,7 @@ void opcontrol()
 			Intake.move_velocity(100);
 		}
 
-			if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1))
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1))
 		{
 			if(ExpansionState == true)
 			{
@@ -748,6 +757,21 @@ void opcontrol()
 				ExpansionState = true;
 			}
 			printf("Expansion state=%d \n", ExpansionState);
+		}
+
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1))
+		{
+			if(ExpansionState2 == true)
+			{
+				pros::c::adi_digital_write(ExpansionIntake, LOW);
+				ExpansionState2 = false;
+			}
+			else
+			{
+				pros::c::adi_digital_write(ExpansionIntake, HIGH);
+				ExpansionState2 = true;
+			}
+			printf("Expansion state=%d \n", ExpansionIntake);
 		}
 	};
 }
