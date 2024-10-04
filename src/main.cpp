@@ -7,6 +7,9 @@
 #include "pros/rtos.hpp"
 //#include <cstddef>
 
+ // path file name is "example.txt".
+// "." is replaced with "_" to overcome c++ limitations
+ASSET(test_path_line_txt);
 
 
 //update all motor ports if needed
@@ -567,16 +570,8 @@ void on_center_button() {}
  */
 void initialize()
 {
-	/*pros::lcd::initialize(); // initialize brain screen
+	pros::lcd::initialize(); // initialize brain screen
     chassis.calibrate(); // calibrate sensors
-
-    // the default rate is 50. however, if you need to change the rate, you
-    // can do the following.
-    // lemlib::bufferedStdout().setRate(...);
-    // If you use bluetooth or a wired connection, you will want to have a rate of 10ms
-
-    // for more information on how the formatting for the loggers
-    // works, refer to the fmtlib docs
 
     // thread to for brain screen and position logging
     pros::Task screenTask([&]() {
@@ -590,7 +585,7 @@ void initialize()
             // delay to save resources
             pros::delay(50);
         }
-    });*/
+    });
 	//selector::init();
 	//Inertial_Sensor.reset(true /*true*/);
 	
@@ -627,12 +622,7 @@ void competition_initialize()
  * from where it left off.
  */
 
- // path file name is "example.txt".
-// "." is replaced with "_" to overcome c++ limitations
-ASSET(Path_01_txt);
-ASSET(Path_02_txt);
-ASSET(Path_03_txt);
-ASSET(example_txt);
+
 
 void autonomous() 
 {
@@ -640,7 +630,7 @@ void autonomous()
     //chassis.setPose(0, 0, 0);
     // lookahead distance: 15 inches
     // timeout: 2000 ms
-    //chassis.follow(Path_01_txt, 15, 2000);
+    chassis.follow(test_path_line_txt, 15, 2000);
     // follow the next path, but with the robot going backwards
     //chassis.follow(Path_01_txt, 15, 2000, false);
 
