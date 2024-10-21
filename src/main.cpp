@@ -680,16 +680,27 @@ void opcontrol()
 	int left;
 	int right;
 	bool IntakeState;
-	bool ExpansionState;
-	bool ExpansionState2;
-	auto ExpansionHook = 'A';
-	auto ExpansionIntake ='B';
+	bool ExpansionClampState;
+	bool ExpansionNeutral;
+	bool ExpansionIntakeState;
+	auto ExpansionClamp = 'E';
+	auto ExpansionIntake ='D';
+	auto NeutralStake ='C';
+	auto NeutralStake2 ='B';
 
 	pros::c::adi_pin_mode(ExpansionIntake, OUTPUT);
 	pros::c::adi_digital_write(ExpansionIntake, LOW);
 
-	pros::c::adi_pin_mode(ExpansionHook, OUTPUT);
-	pros::c::adi_digital_write(ExpansionHook, LOW);
+	pros::c::adi_pin_mode(ExpansionClamp, OUTPUT);
+	pros::c::adi_digital_write(ExpansionClamp, LOW);
+
+	pros::c::adi_pin_mode(NeutralStake, OUTPUT);
+	pros::c::adi_digital_write(NeutralStake, LOW);
+
+	pros::c::adi_pin_mode(NeutralStake2, OUTPUT);
+	pros::c::adi_digital_write(NeutralStake2, LOW);
+
+	//pros::c::adi_digital_write(ExpansionClamp, HIGH);
 
 	while(true){
 		
@@ -734,34 +745,52 @@ void opcontrol()
 			Intake.move_velocity(100);
 		}
 
-		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R1))
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2))
 		{
-			if(ExpansionState == true)
+			if(ExpansionClampState == true)
 			{
-				pros::c::adi_digital_write(ExpansionHook, LOW);
-				ExpansionState = false;
+				pros::c::adi_digital_write(ExpansionClamp, LOW);
+				ExpansionClampState = false;
 			}
 			else
 			{
-				pros::c::adi_digital_write(ExpansionHook, HIGH);
-				ExpansionState = true;
+				pros::c::adi_digital_write(ExpansionClamp, HIGH);
+				ExpansionClampState = true;
 			}
-			printf("Expansion state=%d \n", ExpansionState);
+			printf("Expansion state=%d \n", ExpansionClampState);
+		}
+		
+		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2))
+		{
+			if(ExpansionNeutral == true)
+			{
+				pros::c::adi_digital_write(NeutralStake, LOW);
+				pros::c::adi_digital_write(NeutralStake2, LOW);
+				ExpansionNeutral = false;
+				
+			}
+			else
+			{
+				pros::c::adi_digital_write(NeutralStake, HIGH);
+				pros::c::adi_digital_write(NeutralStake2, HIGH);
+				ExpansionNeutral = true;
+			}
+			printf("Expansion state=%d \n", ExpansionNeutral);
 		}
 
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1))
 		{
-			if(ExpansionState2 == true)
+			if(ExpansionIntakeState == true)
 			{
 				pros::c::adi_digital_write(ExpansionIntake, LOW);
-				ExpansionState2 = false;
+				ExpansionIntakeState = false;
 			}
 			else
 			{
 				pros::c::adi_digital_write(ExpansionIntake, HIGH);
-				ExpansionState2 = true;
+				ExpansionIntakeState = true;
 			}
-			printf("Expansion state=%d \n", ExpansionIntake);
+			printf("Expansion state=%d \n", ExpansionIntakeState);
 		}
 	};
 }
