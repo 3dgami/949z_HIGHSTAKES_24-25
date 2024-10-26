@@ -3,13 +3,12 @@
 //#include "selection.ccp"
 #include "lemlib/api.hpp" // IWYU pragma: keep
 #include "lemlib/chassis/trackingWheel.hpp"
+#include "pros/adi.h"
 #include "pros/misc.h"
 #include "pros/rtos.hpp"
 //#include <cstddef>
 
- // path file name is "example.txt".
-// "." is replaced with "_" to overcome c++ limitations
-ASSET(test_path_line_txt);
+
 
 //nt rightF = 10;
 //int rightB = 1;
@@ -626,16 +625,50 @@ void competition_initialize()
  * from where it left off.
  */
 
-
+ // path file name is "example.txt".
+// "." is replaced with "_" to overcome c++ limitations
+ASSET(test_path_line_txt);
+ASSET(Bottom_path_pt1_txt);
+ASSET(Bottom_path_pt2_txt);
+ASSET(Bottom_path_pt3_txt);
+ASSET(Bottom_path_pt4_txt);
+ASSET(Bottom_path_pt5_txt);
 
 void autonomous() 
 {
-	// set chassis pose
+	bool ExpansionClampState;
+	bool ExpansionIntakeState;
+	auto ExpansionClamp = 'A';
+	auto ExpansionIntake ='D';
+
+	pros::c::adi_pin_mode(ExpansionIntake, OUTPUT);
+	pros::c::adi_digital_write(ExpansionIntake, LOW);
+
+	pros::c::adi_pin_mode(ExpansionClamp, OUTPUT);
+	pros::c::adi_digital_write(ExpansionClamp, LOW);
+
+	//set chassis pose
     //chassis.setPose(0, 0, 0);
-    // lookahead distance: 15 inches
-    chassis.follow(test_path_line_txt, 15, 2000);
-    // follow the next path, but with the robot going backwards
-    //chassis.follow(Path_01_txt, 15, 2000, false);
+    //lookahead distance: 15 inches
+    chassis.follow(Bottom_path_pt1_txt, 15, 2000);
+	Conveyor.move_velocity(100);
+	pros::delay(1000);
+	pros::c::adi_digital_write(ExpansionIntake, HIGH);
+	Intake.move_velocity(600);
+	chassis.follow(Bottom_path_pt2_txt, 15, 2000);
+	Conveyor.move_velocity(0);
+	Intake.move_velocity(0);
+	pros::c::adi_digital_write(ExpansionIntake, LOW);
+	chassis.follow(Bottom_path_pt3_txt, 15, 2000);
+	pros::c::adi_digital_write(ExpansionClamp, HIGH);
+	Conveyor.move_velocity(100);
+	Intake.move_velocity(600);
+	Conveyor.move_velocity(100);
+	chassis.follow(Bottom_path_pt4_txt, 15, 2000);
+	pros::delay(500);
+	Intake.move_velocity(0);
+	Conveyor.move_velocity(0);
+	chassis.follow(Bottom_path_pt5_txt, 15, 2000);
 	
 	driveR_train.move_voltage(0);
 	driveL_train.move_voltage(0);
@@ -786,6 +819,6 @@ void opcontrol()
 
 		//INCLUDE VARIABLE SPEED COLOR SORTING
 
-
+		pros::delay(5);
 	};
 }
