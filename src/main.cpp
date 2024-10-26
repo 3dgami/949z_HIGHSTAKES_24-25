@@ -11,18 +11,22 @@
 // "." is replaced with "_" to overcome c++ limitations
 ASSET(test_path_line_txt);
 
+//nt rightF = 10;
+//int rightB = 1;
+//int leftB = 11;
+//int leftF =12;
 
 //update all motor ports if needed
 pros::Controller master{CONTROLLER_MASTER};	
 pros::Motor right_front(10);
-pros::Motor left_front(20);
+pros::Motor left_front(12);
 pros::Motor left_back(11);
 pros::Motor right_back(1);
 pros::Motor right_mid(33);
 pros::Motor left_mid(22);
-pros::Motor Intake(14);
-pros::Motor IntakeB(13);
-pros::MotorGroup driveL_train({20, 11});
+pros::Motor Conveyor(19);
+pros::Motor Intake(2);
+pros::MotorGroup driveL_train({11, 12});//UPDATE WITH MOTOR WIRING CHANGING
 pros::MotorGroup driveR_train({10, 1});
 pros::IMU imu(2);
 
@@ -626,34 +630,12 @@ void competition_initialize()
 
 void autonomous() 
 {
-	 // set chassis pose
+	// set chassis pose
     //chassis.setPose(0, 0, 0);
     // lookahead distance: 15 inches
-    // timeout: 2000 ms
     chassis.follow(test_path_line_txt, 15, 2000);
     // follow the next path, but with the robot going backwards
     //chassis.follow(Path_01_txt, 15, 2000, false);
-
-
-	/*if(selector::auton == 1)
-	{
-
-	}
-
-	if(selector::auton == 2)
-	{	
-	}
-
-	if(selector::auton == 3)
-	{
-		//do nothing 
-	
-	}
-
-	if(selector::auton == 0)
-	{
-		 //skills
-	}*/
 	
 	driveR_train.move_voltage(0);
 	driveL_train.move_voltage(0);
@@ -683,7 +665,7 @@ void opcontrol()
 	bool ExpansionClampState;
 	bool ExpansionNeutral;
 	bool ExpansionIntakeState;
-	auto ExpansionClamp = 'E';
+	auto ExpansionClamp = 'A';
 	auto ExpansionIntake ='D';
 	auto NeutralStake ='C';
 	auto NeutralStake2 ='B';
@@ -710,7 +692,16 @@ void opcontrol()
 		driveL_train.move(master.get_analog(ANALOG_LEFT_Y));
 		driveR_train.move(master.get_analog(ANALOG_RIGHT_Y));
 		*/
-		
+
+		/*CURVATURE CONTROL*/
+		// get left y and right x positions
+		/*
+        int leftY = master.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
+        int rightX = master.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
+		chassis.curvature(leftY, rightX);
+		*/
+
+
 		/*ARCADE CONTROLL*/
 
 		int power = -(master.get_analog(ANALOG_RIGHT_X));
@@ -721,30 +712,26 @@ void opcontrol()
 		driveL_train.move(left);
 		driveR_train.move(right);
 
+
+		//INTAKE CONTROL
 		if(master.get_digital_new_press(DIGITAL_A))
 		{
 			if(IntakeState == true)
 			{
+				Conveyor.move_velocity(0);
 				Intake.move_velocity(0);
-				IntakeB.move_velocity(0);
 				IntakeState = false;
 			}
 			else
 			{
-				Intake.move_velocity(100);
-				IntakeB.move_velocity(100);
+				Conveyor.move_velocity(-100);
+				Intake.move_velocity(600);
 				IntakeState = true;
 			}
-			printf("Intake state=%d \n", IntakeState);
+			printf("Intake state=%d intake velocity=%f \n", IntakeState, Intake.get_actual_velocity());
 		}
 
-		if(Intake.get_actual_velocity() < 10 and IntakeState == true)
-		{
-			Intake.move_velocity(-100);
-			pros::delay(200);
-			Intake.move_velocity(100);
-		}
-
+		//MOGO CLAMP
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L2))
 		{
 			if(ExpansionClampState == true)
@@ -760,6 +747,8 @@ void opcontrol()
 			printf("Expansion state=%d \n", ExpansionClampState);
 		}
 		
+
+		//NUETRAL STAKE EXPANSION
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_R2))
 		{
 			if(ExpansionNeutral == true)
@@ -778,6 +767,8 @@ void opcontrol()
 			printf("Expansion state=%d \n", ExpansionNeutral);
 		}
 
+
+		//INTAKE EXPANSION
 		if(master.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1))
 		{
 			if(ExpansionIntakeState == true)
@@ -792,5 +783,9 @@ void opcontrol()
 			}
 			printf("Expansion state=%d \n", ExpansionIntakeState);
 		}
+
+		//INCLUDE VARIABLE SPEED COLOR SORTING
+
+
 	};
 }
